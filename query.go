@@ -248,7 +248,8 @@ func (p *Page) ElementsByJS(opts *EvalOptions) (Elements, error) {
 // Search for the given query in the DOM tree until the result count is not zero, before that it will keep retrying.
 // The query can be plain text or css selector or xpath.
 // It will search nested iframes and shadow doms too.
-func (p *Page) Search(query string) (*SearchResult, error) {
+// mustHas: result count may be zero
+func (p *Page) search(query string, mustHas bool) (*SearchResult, error) {
 	sr := &SearchResult{
 		page:    p,
 		restore: p.EnableDomain(proto.DOMEnable{}),
@@ -270,6 +271,9 @@ func (p *Page) Search(query string) (*SearchResult, error) {
 		sr.DOMPerformSearchResult = res
 
 		if res.ResultCount == 0 {
+			if mustHas {
+				return true, nil
+			}
 			return false, nil
 		}
 
@@ -314,6 +318,14 @@ func (p *Page) Search(query string) (*SearchResult, error) {
 	}
 
 	return sr, nil
+}
+
+func (p *Page) Search(query string) (*SearchResult, error) {
+	return p.search(query, false)
+}
+
+func (p *Page) SearchOne(query string) (*SearchResult, error) {
+	return p.search(query, true)
 }
 
 // SearchResult handler
