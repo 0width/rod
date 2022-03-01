@@ -1,4 +1,4 @@
-module github.com/go-rod/rod
+module github.com/0width/rod
 
 go 1.16
 
